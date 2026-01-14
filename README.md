@@ -28,11 +28,11 @@
 1. 克隆或下载此项目到本地
 2. 安装依赖：
    ```bash
-   pip install -r requirements.txt
+   pip3.9 install -r requirements.txt
    ```
 3. 启动服务：
    ```bash
-   python main.py
+   python3.9 main.py
    ```
 
 或者使用启动脚本：
@@ -42,6 +42,39 @@
    ```
 
 服务器将在 http://localhost:5000 上运行。
+
+### 启动EDA工具并加载Design
+
+当插件部署和启动完成后，需要进入case目录启动EDA工具并加载design。默认的case目录是：`/data/casese/top_ASAP7`。插件部署目录是: `/data/EdxPlugin`
+
+启动EDA的操作步骤如下：
+
+1. 进入case目录：
+   ```bash
+   cd /data/casese/top_ASAP7
+   ```
+2. 设置环境变量指向EdxPlugin安装目录:
+   ```bash
+   export EdxPluginPath=插件部署目录
+   ```
+   实际使用时请将"插件部署目录"替换为实际的部署路径，例如：
+   ```bash
+   export EdxPluginPath=/data/EdxPlugin
+   ```
+3. 创建符号链接到插件的apicommon目录：
+   ```bash
+   ln -sf ${EdxPluginPath}/leapr_api/apicommon .
+   ```
+4. 创建符号链接到asap7_scr目录：
+   ```bash
+   ln -sf ${EdxPluginPath}/leapr/asap7_scr scr
+   ```
+5. 启动EDA工具：
+   ```bash
+   cd scr
+   sh run.sh
+   ```
+完成以上步骤后，您就可以在EDA环境中使用本插件提供的功能了。
 
 ### Linux启动脚本使用
 
@@ -75,20 +108,6 @@
 - 自动安装依赖
 - 彩色输出日志
 - 参数化配置
-
-### Windows安装步骤
-
-1. 克隆或下载此项目到本地
-2. 安装依赖：
-   ```cmd
-   pip install -r requirements.txt
-   ```
-3. 启动服务：
-   ```cmd
-   python main.py
-   ```
-   
-或者双击 `start_server.bat` 批处理文件。
 
 ## API接口测试
 
