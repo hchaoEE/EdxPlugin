@@ -67,12 +67,12 @@ chmod +x start_server.sh
    ```
 4. 创建符号链接到asap7_scr目录：
    ```bash
-   ln -sf ${EdxPluginPath}/leapr/asap7_scr scr
+   ln -sf ${EdxPluginPath}/leapr_api/asap7_scr scr
    ```
 5. 启动EDA工具：
    ```bash
    cd scr
-   sh run.sh
+   source run.csh
    ```
 完成以上步骤后，您就可以在EDA环境中使用本插件提供的功能了。
 

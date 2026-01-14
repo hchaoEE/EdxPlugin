@@ -3,7 +3,8 @@ set design top
 set out_dir ${data_dir}/output
 set rpt_dir ${data_dir}/reports
 set apicommon ${data_dir}/apicommon
-set api_dir /data/wskyp/EdxPlugin/tmp
+set edx_plugin_dir $env(EdxPluginPath)
+set api_dir ${edx_plugin_dir}/tmp
 set enable_debug 0
 
 set design_config(${design},netlist) "${data_dir}/input/NETLIST/${design}.v"

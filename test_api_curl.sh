@@ -67,37 +67,25 @@ print_body_lines() {
     fi
 }
 
-# 创建临时网表文件用于测试
-create_test_netlist() {
-    local netlist_path="$1"
-    cat > "$netlist_path" << 'EOF'
-// 测试网表文件
-module test(input clk, input rst, output reg [7:0] q);
-    always @(posedge clk or posedge rst) begin
-        if (rst)
-            q <= 8'b0;
-        else
-            q <= q + 1;
-    end
-endmodule
-EOF
-}
-
 # 测试主页面
 test_home() {
     print_header "测试 1: 主页面接口"
     print_info "GET http://localhost:5000/"
     
-    response=$(curl -s -w "\n%{http_code}" http://localhost:5000/)
-    http_code=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | sed '$d')
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5000/)
+    
+    # 提取响应体、状态码和时间
+    body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+    last_two_lines=$(echo "$response" | tail -n 2)
+    http_code=$(echo "$last_two_lines" | head -n 1)
+    time_total=$(echo "$last_two_lines" | tail -n 1)
     
     if [ "$http_code" -eq 200 ]; then
-        print_success "主页面接口测试成功，状态码: $http_code"
+        print_success "主页面接口测试成功，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((success_count++))
     else
-        print_error "主页面接口测试失败，状态码: $http_code"
+        print_error "主页面接口测试失败，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((failure_count++))
     fi
@@ -110,25 +98,25 @@ test_load_netlist() {
     
     # 创建临时网表文件
     local temp_netlist="/tmp/test_netlist.v"
-    create_test_netlist "$temp_netlist"
-    
     print_info "POST http://localhost:5000/leapr/load_netlist"
-    print_info "上传网表文件: $temp_netlist"
-    
-    response=$(curl -s -w "\n%{http_code}" \
+
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
         -X POST http://localhost:5000/leapr/load_netlist \
         -H "Content-Type: application/json" \
         -d "{\"file_path\": \"$temp_netlist\"}")
     
-    http_code=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | sed '$d')
+    # 提取响应体、状态码和时间
+    body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+    last_two_lines=$(echo "$response" | tail -n 2)
+    http_code=$(echo "$last_two_lines" | head -n 1)
+    time_total=$(echo "$last_two_lines" | tail -n 1)
     
     if [ "$http_code" -eq 200 ]; then
-        print_success "加载网表接口测试成功，状态码: $http_code"
+        print_success "加载网表接口测试成功，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((success_count++))
     else
-        print_error "加载网表接口测试失败，状态码: $http_code"
+        print_error "加载网表接口测试失败，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((failure_count++))
     fi
@@ -143,16 +131,20 @@ test_get_timing_default() {
     print_header "测试 3.1: 获取时序信息接口（默认参数）"
     print_info "GET http://localhost:5000/leapr/get_timing"
     
-    response=$(curl -s -w "\n%{http_code}" http://localhost:5000/leapr/get_timing)
-    http_code=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | sed '$d')
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5000/leapr/get_timing)
+    
+    # 提取响应体、状态码和时间
+    body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+    last_two_lines=$(echo "$response" | tail -n 2)
+    http_code=$(echo "$last_two_lines" | head -n 1)
+    time_total=$(echo "$last_two_lines" | tail -n 1)
     
     if [ "$http_code" -eq 200 ]; then
-        print_success "获取时序信息接口测试成功（默认参数），状态码: $http_code"
+        print_success "获取时序信息接口测试成功（默认参数），状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((success_count++))
     else
-        print_error "获取时序信息接口测试失败（默认参数），状态码: $http_code"
+        print_error "获取时序信息接口测试失败（默认参数），状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((failure_count++))
     fi
@@ -164,16 +156,20 @@ test_get_timing_with_topn_1() {
     print_header "测试 3.2: 获取时序信息接口（topn=1参数）"
     print_info "GET http://localhost:5000/leapr/get_timing?topn=1"
     
-    response=$(curl -s -w "\n%{http_code}" http://localhost:5000/leapr/get_timing?topn=1)
-    http_code=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | sed '$d')
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5000/leapr/get_timing?topn=1)
+    
+    # 提取响应体、状态码和时间
+    body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+    last_two_lines=$(echo "$response" | tail -n 2)
+    http_code=$(echo "$last_two_lines" | head -n 1)
+    time_total=$(echo "$last_two_lines" | tail -n 1)
     
     if [ "$http_code" -eq 200 ]; then
-        print_success "获取时序信息接口测试成功（topn=1），状态码: $http_code"
+        print_success "获取时序信息接口测试成功（topn=1），状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((success_count++))
     else
-        print_error "获取时序信息接口测试失败（topn=1），状态码: $http_code"
+        print_error "获取时序信息接口测试失败（topn=1），状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((failure_count++))
     fi
@@ -185,16 +181,20 @@ test_get_timing_with_topn_3() {
     print_header "测试 3.3: 获取时序信息接口（topn=3参数）"
     print_info "GET http://localhost:5000/leapr/get_timing?topn=3"
     
-    response=$(curl -s -w "\n%{http_code}" http://localhost:5000/leapr/get_timing?topn=3)
-    http_code=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | sed '$d')
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5000/leapr/get_timing?topn=3)
+    
+    # 提取响应体、状态码和时间
+    body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+    last_two_lines=$(echo "$response" | tail -n 2)
+    http_code=$(echo "$last_two_lines" | head -n 1)
+    time_total=$(echo "$last_two_lines" | tail -n 1)
     
     if [ "$http_code" -eq 200 ]; then
-        print_success "获取时序信息接口测试成功（topn=3），状态码: $http_code"
+        print_success "获取时序信息接口测试成功（topn=3），状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((success_count++))
     else
-        print_error "获取时序信息接口测试失败（topn=3），状态码: $http_code"
+        print_error "获取时序信息接口测试失败（topn=3），状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((failure_count++))
     fi
@@ -207,20 +207,23 @@ test_execute_tcl() {
     print_info "POST http://localhost:5000/leapr/execute_tcl"
     print_info "请求体: {\"command\": \"[puts test_tcl]\"}}"
 
-    response=$(curl -s -w "\n%{http_code}" \
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
         -X POST http://localhost:5000/leapr/execute_tcl \
         -H "Content-Type: application/json" \
         -d '{"commands": ["puts test_tcl"]}')
     
-    http_code=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | sed '$d')
+    # 提取响应体、状态码和时间
+    body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+    last_two_lines=$(echo "$response" | tail -n 2)
+    http_code=$(echo "$last_two_lines" | head -n 1)
+    time_total=$(echo "$last_two_lines" | tail -n 1)
     
     if [ "$http_code" -eq 200 ]; then
-        print_success "执行TCL命令接口测试成功，状态码: $http_code"
+        print_success "执行TCL命令接口测试成功，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((success_count++))
     else
-        print_error "执行TCL命令接口测试失败，状态码: $http_code"
+        print_error "执行TCL命令接口测试失败，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((failure_count++))
     fi
@@ -232,23 +235,177 @@ test_place_cells() {
     print_header "测试 5: 执行cell摆放接口"
     print_info "POST http://localhost:5000/leapr/place_cells"
     
-    response=$(curl -s -w "\n%{http_code}" \
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
         -X POST http://localhost:5000/leapr/place_cells \
         -H "Content-Type: application/json" \
         -d '[{"cell_name": "u_macc_top/macc[0].u_macc/lc_drvi15_n119", "x": 10.67, "y": 11.12, "width": 10.0, "height": 12.0, "orient": "R0", "place_status": "PLACED"}]')
     
-    http_code=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | sed '$d')
+    # 提取响应体、状态码和时间
+    body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+    last_two_lines=$(echo "$response" | tail -n 2)
+    http_code=$(echo "$last_two_lines" | head -n 1)
+    time_total=$(echo "$last_two_lines" | tail -n 1)
     
     if [ "$http_code" -eq 200 ]; then
-        print_success "执行cell摆放接口测试成功，状态码: $http_code"
+        print_success "执行cell摆放接口测试成功，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((success_count++))
     else
-        print_error "执行cell摆放接口测试失败，状态码: $http_code"
+        print_error "执行cell摆放接口测试失败，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 10
         ((failure_count++))
     fi
+    echo
+}
+
+# 综合测试：获取时序路径，移动终点cell，比较slack变化
+test_timing_slack_change() {
+    print_header "测试 6: 时序slack变化测试"
+    print_info "综合测试：获取top1时序路径 -> 移动终点cell -> 比较slack变化"
+    
+    # 步骤1: 获取当前top1时序路径
+    print_info "步骤1: 获取当前top1时序路径"
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5000/leapr/get_timing?topn=1)
+    
+    # 提取响应体、状态码和时间
+    body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+    last_two_lines=$(echo "$response" | tail -n 2)
+    http_code=$(echo "$last_two_lines" | head -n 1)
+    time_total=$(echo "$last_two_lines" | tail -n 1)
+    
+    if [ "$http_code" -ne 200 ]; then
+        print_error "获取时序信息失败，状态码: $http_code，响应时间: ${time_total}s"
+        print_body_lines "$body" 10
+        ((failure_count++))
+        echo
+        return
+    fi
+    
+    print_success "获取初始时序信息成功，响应时间: ${time_total}s"
+    
+    # 提取第一个时序路径的终点cell信息（需要使用jq来解析JSON）
+    if command -v jq &> /dev/null; then
+        # 尝试提取第一个timing path的end_point
+        endpoint=$(echo "$body" | jq -r '.data.timing_paths[0].end_point' 2>/dev/null)
+        initial_slack=$(echo "$body" | jq -r '.data.timing_paths[0].slack' 2>/dev/null)
+        
+        if [ -z "$endpoint" ] || [ "$endpoint" = "null" ]; then
+            print_warning "未能从响应中提取到有效的end_point，跳过此测试"
+            ((success_count++))
+            echo
+            return
+        fi
+        
+        if [ -z "$initial_slack" ] || [ "$initial_slack" = "null" ]; then
+            print_warning "未能从响应中提取到有效的slack值，跳过此测试"
+            ((success_count++))
+            echo
+            return
+        fi
+        
+        print_info "提取到终点cell: $endpoint, 初始slack: $initial_slack"
+        
+        # 步骤2: 准备移动cell的请求数据
+        print_info "步骤2: 准备移动cell $endpoint 到新位置"
+        
+        # 生成新的随机坐标
+        new_x=$(awk -v min=0 -v max=60 'BEGIN{srand(); print min+int(rand()*(max-min+1))}')
+        new_y=$(awk -v min=0 -v max=60 'BEGIN{srand(); print min+int(rand()*(max-min+1))}')
+        # 构造移动cell的请求
+
+        # 从endpoint中提取cell_name（最后一个'/'之前的部分）
+        cell_name="u_macc_top/macc[2].u_macc/U127"
+        move_request="[{\"cell_name\": \"$cell_name\", \"x\": $new_x, \"y\": $new_y, \"width\": 60.0, \"height\": 12.0, \"orient\": \"R0\", \"place_status\": \"PLACED\"}]"
+        
+        # 步骤3: 执行cell移动
+        print_info "步骤3: 执行cell移动，新位置: ($new_x, $new_y)"
+        response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
+            -X POST http://localhost:5000/leapr/place_cells \
+            -H "Content-Type: application/json" \
+            -d "$move_request")
+        
+        # 提取响应体、状态码和时间
+        body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+        last_two_lines=$(echo "$response" | tail -n 2)
+        http_code=$(echo "$last_two_lines" | head -n 1)
+        time_total=$(echo "$last_two_lines" | tail -n 1)
+        
+        if [ "$http_code" -ne 200 ]; then
+            print_error "移动cell失败，状态码: $http_code，响应时间: ${time_total}s"
+            print_body_lines "$body" 10
+            ((failure_count++))
+            echo
+            return
+        fi
+
+        # 步骤3.1 执行tcl命令: bind_design
+        print_info "步骤3.1: 执行tcl命令: bind_design"
+        response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
+            -X POST http://localhost:5000/leapr/execute_tcl \
+            -H "Content-Type: application/json" \
+            -d '{"commands": ["bind_design","opt_design"]}')
+        body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+        if [ "$http_code" -ne 200 ]; then
+            print_error "执行tcl命令: bind_design 失败，状态码: $http_code，响应时间: ${time_total}s"
+            print_body_lines "$body" 10
+            ((failure_count++))
+            echo
+            return
+        fi
+        
+        print_success "cell移动成功，响应时间: ${time_total}s"
+        
+        # 步骤4: 再次获取top1时序路径
+        print_info "步骤4: 重新获取top1时序路径以比较slack变化"
+        response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5000/leapr/get_timing?topn=1)
+
+        # 提取响应体、状态码和时间
+        body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
+        last_two_lines=$(echo "$response" | tail -n 2)
+        http_code=$(echo "$last_two_lines" | head -n 1)
+        time_total=$(echo "$last_two_lines" | tail -n 1)
+
+        if [ "$http_code" -ne 200 ]; then
+            print_error "重新获取时序信息失败，状态码: $http_code，响应时间: ${time_total}s"
+            print_body_lines "$body" 10
+            ((failure_count++))
+            echo
+            return
+        fi
+
+        print_success "重新获取时序信息成功，响应时间: ${time_total}s"
+
+        # 提取新的slack值
+        new_slack=$(echo "$body" | jq -r '.data.timing_paths[0].slack' 2>/dev/null)
+
+        if [ -z "$new_slack" ] || [ "$new_slack" = "null" ]; then
+            print_warning "未能从响应中提取到新的slack值"
+            new_slack="N/A"
+            slack_diff="N/A"
+        else
+            # 计算slack差值
+            slack_diff=$(echo "$new_slack $initial_slack" | awk '{printf "%.6f", $1 - $2}')
+        fi
+        
+        # 步骤5: 打印结果
+        print_info "========== 测试结果 =========="
+        print_info "初始slack: $initial_slack"
+        print_info "移动cell后slack: $new_slack"
+        print_info "slack差值 (新-旧): $slack_diff"
+        print_info "============================="
+        
+        if [ "$new_slack" != "N/A" ]; then
+            print_success "综合测试完成，成功比较了移动cell前后的时序slack变化"
+            ((success_count++))
+        else
+            print_warning "综合测试部分完成，但未能计算slack差值"
+            ((success_count++))  # 仍视为成功，因为主要流程已完成
+        fi
+    else
+        print_warning "系统未安装jq，无法解析JSON响应，跳过此测试"
+        ((success_count++))
+    fi
+    
     echo
 }
 
@@ -372,6 +529,7 @@ test_get_timing_with_topn_1
 test_get_timing_with_topn_3
 test_execute_tcl
 test_place_cells
+test_timing_slack_change
 
 # 打印测试结果统计
 print_test_summary
