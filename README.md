@@ -389,6 +389,24 @@ curl -X POST http://localhost:5000/leapr/upload_file \
 
 > 注：data字段包含上传文件的路径、文件名和文件大小信息
 
+### 6. 下载文件 (`GET /<tool_name>/download_file`)
+
+为指定EDA工具执行TCL脚本并下载生成的文件。
+
+#### 查询参数
+- `script_name`: TCL脚本名称（必需），指定要执行的TCL脚本文件名（不含扩展名）
+
+#### 示例请求 (Leapr)
+```bash
+# 执行get_netlist.tcl脚本并下载生成的get_netlist.tar.gz文件
+curl -X GET "http://localhost:5000/leapr/download_file?script_name=get_netlist" -O
+```
+
+#### 响应格式
+返回TCL脚本执行后在edx_tmp目录下生成的压缩文件（.tar.gz格式）。
+
+> 注：此接口用于执行指定的TCL脚本并返回生成的文件，适用于需要执行特定脚本并获取结果文件的场景
+
 ## 错误处理
 
 API会返回适当的HTTP状态码和错误信息：
