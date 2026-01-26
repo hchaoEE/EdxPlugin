@@ -204,7 +204,11 @@ dict for {net_name net_info} $net_map {
         set last_net_time $current_time
     }
 }
-
+# 将server_result_txt压缩到get_netlist.tar.gz
+set current_dir [file dirname [pwd]]
+cd $EDX_TMP
+exec tar -czf get_netlist.tar.gz server_result.txt
+cd $current_dir
 set end_time [clock seconds]
 set total_elapsed [expr $end_time - $start_time]
 puts stderr "Total nets processed: $net_count"

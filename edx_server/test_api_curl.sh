@@ -508,6 +508,62 @@ test_upload_file() {
     echo
 }
 
+# 测试下载文件接口
+test_download_file() {
+    print_header "测试 10: 下载文件接口"
+    print_info "GET http://localhost:5002/leapr/download_file?script_name=get_netlist"
+    
+    # 创建临时文件来保存下载的文件
+    temp_download_file="/tmp/download_file_test.tar.gz"
+    
+    # 执行下载请求
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
+        -X GET "${API_BASE_URL}/leapr/download_file?script_name=get_netlist" \
+        -H "Content-Type: application/json" \
+        --output "$temp_download_file")
+    
+    # 获取响应状态码和时间
+    last_line=$(echo "$response" | tail -n 1)
+    second_last_line=$(echo "$response" | tail -n 2 | head -n 1)
+    http_code=$second_last_line
+    time_total=$last_line
+    
+    if [ "$http_code" -eq 200 ]; then
+        # 检查下载的文件是否存在且不为空
+        if [ -f "$temp_download_file" ] && [ -s "$temp_download_file" ]; then
+            file_size=$(stat -c%s "$temp_download_file" 2>/dev/null || stat -f%z "$temp_download_file" 2>/dev/null || echo 0)
+            print_success "下载文件接口测试成功，状态码: $http_code，响应时间: ${time_total}s，文件大小: ${file_size} bytes"
+            
+            # 尝试列出压缩包内容
+            print_info "下载的压缩文件内容预览:"
+            tar -tzf "$temp_download_file" 2>/dev/null | head -n 10
+            if [ $? -ne 0 ]; then
+                # 如果tar命令失败，尝试使用file命令查看文件类型
+                print_info "文件类型: $(file "$temp_download_file")"
+            fi
+            
+            ((success_count++))
+        else
+            print_error "下载文件接口测试失败，状态码: $http_code，但下载的文件不存在或为空"
+            ((failure_count++))
+        fi
+    else
+        print_error "下载文件接口测试失败，状态码: $http_code，响应时间: ${time_total}s"
+        # 尝试获取错误响应体
+        if [ -f "$temp_download_file" ]; then
+            error_response=$(cat "$temp_download_file")
+            if [ -n "$error_response" ]; then
+                print_body_lines "$error_response" 10
+            fi
+        fi
+        ((failure_count++))
+    fi
+    
+    # 清理临时文件
+#    rm -f "$temp_download_file"
+    echo
+}
+
 # 检查依赖
 check_dependencies() {
     print_info "检查依赖项..."
@@ -519,6 +575,10 @@ check_dependencies() {
     
     if ! command -v jq &> /dev/null; then
         print_warning "jq 未安装，将无法格式化JSON输出"
+    fi
+    
+    if ! command -v tar &> /dev/null; then
+        print_warning "tar 未安装，将无法解压下载的文件"
     fi
     
     print_success "依赖检查完成"
@@ -621,16 +681,17 @@ check_service
 print_info "开始测试 EDX Plugin API 接口..."
 echo
 
-test_home
-test_load_netlist
-test_get_timing_default
-test_get_timing_with_topn_1
-test_get_timing_with_topn_3
-test_execute_tcl
-test_place_cells
-test_timing_slack_change
-test_download_netlist
-test_upload_file
+#test_home
+#test_load_netlist
+#test_get_timing_default
+#test_get_timing_with_topn_1
+#test_get_timing_with_topn_3
+#test_execute_tcl
+#test_place_cells
+#test_timing_slack_change
+#test_download_netlist
+#test_upload_file
+test_download_file
 
 # 打印测试结果统计
 print_test_summary

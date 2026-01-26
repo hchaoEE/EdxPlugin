@@ -460,6 +460,63 @@ def upload_file(tool_name):
         return jsonify(EdxResponse(500, "Internal server error").to_dict()), 500
 
 
+@app.route('/<tool_name>/download_file', methods=['GET'])
+def download_file(tool_name):
+    """
+    下载文件接口
+    查询参数:
+    - script_name: TCL脚本名称（如get_netlist）
+    """
+    logger.info(f"接收到[{tool_name}]的下载文件请求")
+    try:
+        if tool_name not in eda_tools:
+            error_msg = f"Unsupported EDA tool: {tool_name}. Supported tools: {list(eda_tools.keys())}"
+            logger.error(error_msg)
+            return jsonify(EdxResponse(400, error_msg).to_dict()), 400
+
+        # 获取查询参数script_name
+        script_name = request.args.get('script_name', default='', type=str)
+        
+        if not script_name:
+            logger.error(f"[{tool_name}] 未提供script_name参数")
+            return jsonify(EdxResponse(400, "Missing script_name parameter").to_dict()), 400
+
+        # 获取edx_tmp目录
+        edx_tmp_dir = DEFAULT_CONFIG.get("edx_tmp")
+        if not edx_tmp_dir or edx_tmp_dir == "":
+            logger.error(f"[{tool_name}] edx_tmp配置未设置")
+            return jsonify(EdxResponse(500, "edx_tmp directory not configured").to_dict()), 500
+
+        # 根据script_name确定TCL脚本路径
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        tcl_script_path = os.path.join(current_dir, "apicommon", f"{script_name}.tcl")
+        
+        # 检查TCL脚本是否存在
+        if not os.path.exists(tcl_script_path):
+            logger.error(f"[{tool_name}] TCL脚本不存在: {tcl_script_path}")
+            return jsonify(EdxResponse(400, f"TCL script {script_name}.tcl not found").to_dict()), 400
+
+        # 执行TCL脚本
+        tcl_sender = TCLSender()
+        result = tcl_sender.send_tcl_file(tcl_script_path, return_result=False)
+        
+        # 生成预期的输出文件路径 (script_name.tar.gz)
+        output_file_path = os.path.join(edx_tmp_dir, f"{script_name}.tar.gz")
+        
+        # 检查输出文件是否存在
+        if not os.path.exists(output_file_path):
+            logger.error(f"[{tool_name}] 输出文件不存在: {output_file_path}")
+            return jsonify(EdxResponse(404, f"Generated file {script_name}.tar.gz not found in edx_tmp directory").to_dict()), 404
+
+        logger.info(f"[{tool_name}] 准备返回下载文件: {output_file_path}")
+        return send_file(output_file_path, as_attachment=True, download_name=os.path.basename(output_file_path))
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"[{tool_name}] 下载文件时发生未预期异常: {error_msg}")
+        return jsonify(EdxResponse(500, "Internal server error").to_dict()), 500
+
+
 if __name__ == '__main__':
     logger.info("启动EDX Plugin REST API服务器")
     app.run(debug=True, host='0.0.0.0', port=5000)
