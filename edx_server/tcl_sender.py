@@ -105,5 +105,5 @@ class TCLSender:
 if __name__ == '__main__':
     tcl_sender = TCLSender()
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    result = tcl_sender.send_tcl_file(os.path.join(current_dir, 'apicommon', "get_all_cell_info.tcl"))
+    result = tcl_sender.send_tcl_file(os.path.join(current_dir, 'apicommon', "get_netlist.tcl"))
     print(result)

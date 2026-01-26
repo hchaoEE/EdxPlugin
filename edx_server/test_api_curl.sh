@@ -70,9 +70,9 @@ print_body_lines() {
 # 测试主页面
 test_home() {
     print_header "测试 1: 主页面接口"
-    print_info "GET http://localhost:5001/"
+    print_info "GET http://localhost:5002/"
     
-    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5001/)
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5002/)
     
     # 提取响应体、状态码和时间
     body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
@@ -98,10 +98,10 @@ test_load_netlist() {
     
     # 创建临时网表文件
     local temp_netlist="/tmp/test_netlist.v"
-    print_info "POST http://localhost:5001/leapr/load_netlist"
+    print_info "POST http://localhost:5002/leapr/load_netlist"
 
     response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
-        -X POST http://localhost:5001/leapr/load_netlist \
+        -X POST http://localhost:5002/leapr/load_netlist \
         -H "Content-Type: application/json" \
         -d "{\"file_path\": \"$temp_netlist\"}")
     
@@ -129,9 +129,9 @@ test_load_netlist() {
 # 测试获取时序信息（无参数）
 test_get_timing_default() {
     print_header "测试 3.1: 获取时序信息接口（默认参数）"
-    print_info "GET http://localhost:5001/leapr/get_timing"
+    print_info "GET http://localhost:5002/leapr/get_timing"
     
-    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5001/leapr/get_timing)
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5002/leapr/get_timing)
     
     # 提取响应体、状态码和时间
     body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
@@ -154,9 +154,9 @@ test_get_timing_default() {
 # 测试获取时序信息（topn参数为1）
 test_get_timing_with_topn_1() {
     print_header "测试 3.2: 获取时序信息接口（topn=1参数）"
-    print_info "GET http://localhost:5001/leapr/get_timing?topn=1"
+    print_info "GET http://localhost:5002/leapr/get_timing?topn=1"
     
-    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5001/leapr/get_timing?topn=1)
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5002/leapr/get_timing?topn=1)
     
     # 提取响应体、状态码和时间
     body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
@@ -179,9 +179,9 @@ test_get_timing_with_topn_1() {
 # 测试获取时序信息（topn参数为3）
 test_get_timing_with_topn_3() {
     print_header "测试 3.3: 获取时序信息接口（topn=3参数）"
-    print_info "GET http://localhost:5001/leapr/get_timing?topn=3"
+    print_info "GET http://localhost:5002/leapr/get_timing?topn=3"
     
-    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5001/leapr/get_timing?topn=3)
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5002/leapr/get_timing?topn=3)
     
     # 提取响应体、状态码和时间
     body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
@@ -204,11 +204,11 @@ test_get_timing_with_topn_3() {
 # 测试执行TCL命令
 test_execute_tcl() {
     print_header "测试 4: 执行TCL命令接口"
-    print_info "POST http://localhost:5001/leapr/execute_tcl"
+    print_info "POST http://localhost:5002/leapr/execute_tcl"
     print_info "请求体: {\"command\": \"[puts test_tcl]\"}}"
 
     response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
-        -X POST http://localhost:5001/leapr/execute_tcl \
+        -X POST http://localhost:5002/leapr/execute_tcl \
         -H "Content-Type: application/json" \
         -d '{"commands": ["puts test_tcl"]}')
     
@@ -233,10 +233,10 @@ test_execute_tcl() {
 # 测试执行cell摆放
 test_place_cells() {
     print_header "测试 5: 执行cell摆放接口"
-    print_info "POST http://localhost:5001/leapr/place_cells"
+    print_info "POST http://localhost:5002/leapr/place_cells"
     
     response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
-        -X POST http://localhost:5001/leapr/place_cells \
+        -X POST http://localhost:5002/leapr/place_cells \
         -H "Content-Type: application/json" \
         -d '[{"cell_name": "u_macc_top/macc[0].u_macc/lc_drvi15_n119", "x": 10.67, "y": 11.12, "width": 10.0, "height": 12.0, "orient": "R0", "place_status": "PLACED"}]')
     
@@ -260,8 +260,8 @@ test_place_cells() {
 
 # 测试下载网表文件接口
 test_download_netlist() {
-    print_header "测试 7: 下载网表文件接口"
-    print_info "GET http://localhost:5001/leapr/download_netlist"
+    print_header "测试 6: 下载网表文件接口"
+    print_info "GET http://localhost:5002/leapr/download_netlist"
     
     # 创建临时文件来保存下载的网表
     temp_download_file="/tmp/netlist_test.gz"
@@ -308,12 +308,12 @@ test_download_netlist() {
 
 # 综合测试：获取时序路径，移动终点cell，比较slack变化
 test_timing_slack_change() {
-    print_header "测试 6: 时序slack变化测试"
+    print_header "测试 7: 时序slack变化测试"
     print_info "综合测试：获取top1时序路径 -> 移动终点cell -> 比较slack变化"
     
     # 步骤1: 获取当前top1时序路径
     print_info "步骤1: 获取当前top1时序路径"
-    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5001/leapr/get_timing?topn=1)
+    response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5002/leapr/get_timing?topn=1)
     
     # 提取响应体、状态码和时间
     body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
@@ -368,7 +368,7 @@ test_timing_slack_change() {
         # 步骤3: 执行cell移动
         print_info "步骤3: 执行cell移动，新位置: ($new_x, $new_y)"
         response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
-            -X POST http://localhost:5001/leapr/place_cells \
+            -X POST http://localhost:5002/leapr/place_cells \
             -H "Content-Type: application/json" \
             -d "$move_request")
         
@@ -389,7 +389,7 @@ test_timing_slack_change() {
         # 步骤3.1 执行tcl命令: bind_design
         print_info "步骤3.1: 执行tcl命令: bind_design"
         response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
-            -X POST http://localhost:5001/leapr/execute_tcl \
+            -X POST http://localhost:5002/leapr/execute_tcl \
             -H "Content-Type: application/json" \
             -d '{"commands": ["bind_design"]}')
         body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
@@ -405,7 +405,7 @@ test_timing_slack_change() {
         
         # 步骤4: 再次获取top1时序路径
         print_info "步骤4: 重新获取top1时序路径以比较slack变化"
-        response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5001/leapr/get_timing?topn=1)
+        response=$(curl -s -w "\n%{http_code}\n%{time_total}" http://localhost:5002/leapr/get_timing?topn=1)
 
         # 提取响应体、状态码和时间
         body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
@@ -457,16 +457,21 @@ test_timing_slack_change() {
     echo
 }
 
-# 测试复杂数据处理接口
-test_process_complex_data() {
-    print_header "测试 8: 复杂数据处理接口"
-    print_info "POST http://localhost:5001/leapr/process_complex_data"
+# 测试上传文件接口
+test_upload_file() {
+    print_header "测试 9: 上传文件接口"
+    print_info "POST http://localhost:5002/leapr/upload_file"
     
-    # 发送测试数据到复杂数据处理接口
+    # 创建一个临时测试文件
+    temp_test_file="/tmp/test_upload.txt"
+    echo "这是一个用于测试上传功能的临时文件" > "$temp_test_file"
+    echo "当前时间: $(date)" >> "$temp_test_file"
+    
+    # 使用curl上传文件
     response=$(curl -s -w "\n%{http_code}\n%{time_total}" \
-        -X POST http://localhost:5001/leapr/process_complex_data \
-        -H "Content-Type: application/json" \
-        -d '{"test_data": {"numbers": [1, 2, 3, 4, 5], "operation": "sum"}}')
+        -X POST "${API_BASE_URL}/leapr/upload_file" \
+        -H "Content-Type: multipart/form-data" \
+        -F "file=@$temp_test_file")
     
     # 提取响应体、状态码和时间
     body=$(echo "$response" | sed -n '1,/^200$/p' | sed '$d')
@@ -475,14 +480,31 @@ test_process_complex_data() {
     time_total=$(echo "$last_two_lines" | tail -n 1)
     
     if [ "$http_code" -eq 200 ]; then
-        print_success "复杂数据处理接口测试成功，状态码: $http_code，响应时间: ${time_total}s"
+        print_success "上传文件接口测试成功，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 100
+        
+        # 检查响应中是否包含文件信息
+        if command -v jq &> /dev/null; then
+            file_path=$(echo "$body" | jq -r '.data.file_path' 2>/dev/null)
+            file_name=$(echo "$body" | jq -r '.data.file_name' 2>/dev/null)
+            file_size=$(echo "$body" | jq -r '.data.file_size' 2>/dev/null)
+            
+            if [ -n "$file_path" ] && [ "$file_path" != "null" ]; then
+                print_info "上传的文件路径: $file_path"
+                print_info "上传的文件名: $file_name"
+                print_info "上传的文件大小: $file_size bytes"
+            fi
+        fi
+        
         ((success_count++))
     else
-        print_error "复杂数据处理接口测试失败，状态码: $http_code，响应时间: ${time_total}s"
+        print_error "上传文件接口测试失败，状态码: $http_code，响应时间: ${time_total}s"
         print_body_lines "$body" 100
         ((failure_count++))
     fi
+    
+    # 清理临时文件
+    rm -f "$temp_test_file"
     echo
 }
 
@@ -505,14 +527,14 @@ check_dependencies() {
 
 # 检查服务是否运行
 check_service() {
-    print_info "检查服务是否运行在 http://localhost:5001..."
+    print_info "检查服务是否运行在 http://localhost:5002..."
     
-    if timeout 10 bash -c "until curl -s -o /dev/null http://localhost:5001/; do sleep 0.5; done"; then
+    if timeout 10 bash -c "until curl -s -o /dev/null http://localhost:5002/; do sleep 0.5; done"; then
         print_success "服务正在运行"
         echo
         return 0
     else
-        print_error "服务未在 http://localhost:5001 运行"
+        print_error "服务未在 http://localhost:5002 运行"
         print_info "请先启动服务: ./run_server.py 或 python main.py"
         exit 1
     fi
@@ -546,7 +568,7 @@ show_usage() {
     echo "选项:"
     echo "  --help     显示此帮助信息"
     echo "  --host     指定服务器主机 (默认: localhost)"
-    echo "  --port     指定服务器端口 (默认: 5001)"
+    echo "  --port     指定服务器端口 (默认: 5002)"
     echo
     echo "示例:"
     echo "  $0                           # 使用默认设置测试"
@@ -556,7 +578,7 @@ show_usage() {
 
 # 解析命令行参数
 HOST="localhost"
-PORT="5001"
+PORT="5002"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -608,6 +630,7 @@ test_execute_tcl
 test_place_cells
 test_timing_slack_change
 test_download_netlist
+test_upload_file
 
 # 打印测试结果统计
 print_test_summary

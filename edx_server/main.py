@@ -1,5 +1,7 @@
 import re
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
+import os
+import logging
 from plugin_data import *
 from tcl_sender import *
 import json
@@ -63,7 +65,7 @@ class Leapr_Tool(BaseEDA_Tool):
         """
         # 当前main.py文件的绝对路径
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        netlist_file_path = os.path.join(current_dir, "apicommon", "get_all_cell_info.tcl")
+        netlist_file_path = os.path.join(current_dir, "apicommon", "get_netlist.tcl")
         tcl_sender = TCLSender()
         result = tcl_sender.send_tcl_file(netlist_file_path)
         my_design = Design()
@@ -124,7 +126,7 @@ class Leapr_Tool(BaseEDA_Tool):
         :return: 压缩文件路径
         """
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        netlist_file_path = os.path.join(current_dir,"apicommon", "get_all_cell_info.tcl")
+        netlist_file_path = os.path.join(current_dir,"apicommon", "get_netlist.tcl")
         tcl_sender = TCLSender()
         result = tcl_sender.send_tcl_file(netlist_file_path, return_result=False)
         if len(result) != 1:
@@ -243,7 +245,8 @@ def home():
             "/<tool_name>/download_netlist",
             "/<tool_name>/get_timing",
             "/<tool_name>/execute_tcl",
-            "/<tool_name>/place_cells"
+            "/<tool_name>/place_cells",
+            "/<tool_name>/upload_file"  # 添加上传文件接口
         ]
     }
     logger.info("主页请求处理完成")
@@ -292,7 +295,6 @@ def download_netlist(tool_name):
             return jsonify(EdxResponse(500, error_msg).to_dict()), 500
 
         # 返回文件供下载
-        from flask import send_file
         logger.info(f"[{tool_name}] 网表文件生成成功，准备返回下载: {compressed_file_path}")
         return send_file(compressed_file_path, as_attachment=True, download_name=os.path.basename(compressed_file_path))
 
@@ -401,6 +403,61 @@ def place_cells(tool_name):
         error_msg = str(e)
         logger.error(f"[{tool_name}] 执行cell摆放时发生未预期异常: {error_msg}")
         return jsonify(EdxResponse(500, "Internal server error", {}).to_dict()), 500
+
+
+@app.route('/<tool_name>/upload_file', methods=['POST'])
+def upload_file(tool_name):
+    """
+    上传文件到edx_tmp目录
+    """
+    logger.info(f"接收到[{tool_name}]的上传文件请求")
+    try:
+        if tool_name not in eda_tools:
+            error_msg = f"Unsupported EDA tool: {tool_name}. Supported tools: {list(eda_tools.keys())}"
+            logger.error(error_msg)
+            return jsonify(EdxResponse(400, error_msg).to_dict()), 400
+
+        # 检查请求中是否包含文件
+        if 'file' not in request.files:
+            logger.error(f"[{tool_name}] 上传文件请求中未包含文件")
+            return jsonify(EdxResponse(400, "No file part in request").to_dict()), 400
+
+        file = request.files['file']
+        
+        # 检查是否选择了文件
+        if file.filename == '':
+            logger.error(f"[{tool_name}] 未选择文件进行上传")
+            return jsonify(EdxResponse(400, "No file selected").to_dict()), 400
+
+        if file:
+            # 获取edx_tmp目录
+            edx_tmp_dir = DEFAULT_CONFIG.get("edx_tmp")
+            if not edx_tmp_dir or edx_tmp_dir == "":
+                logger.error(f"[{tool_name}] edx_tmp配置未设置")
+                return jsonify(EdxResponse(500, "edx_tmp directory not configured").to_dict()), 500
+
+            # 确保目录存在
+            os.makedirs(edx_tmp_dir, exist_ok=True)
+
+            # 保存文件到edx_tmp目录
+            file_path = os.path.join(edx_tmp_dir, file.filename)
+            file.save(file_path)
+
+            logger.info(f"[{tool_name}] 文件上传成功: {file_path}")
+            response_data = {
+                "file_path": file_path,
+                "file_name": file.filename,
+                "file_size": os.path.getsize(file_path)
+            }
+            return jsonify(EdxResponse(200, "File uploaded successfully", response_data).to_dict()), 200
+        else:
+            logger.error(f"[{tool_name}] 上传的文件无效")
+            return jsonify(EdxResponse(400, "Invalid file").to_dict()), 400
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"[{tool_name}] 上传文件时发生未预期异常: {error_msg}")
+        return jsonify(EdxResponse(500, "Internal server error").to_dict()), 500
 
 
 if __name__ == '__main__':

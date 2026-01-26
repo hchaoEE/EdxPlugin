@@ -11,6 +11,7 @@
 - 🔄 **多工具支持**: 支持Leapr等多种EDA工具
 - 📝 **日志记录**: 详细的日志记录功能，便于问题定位
 - 📊 **统一响应格式**: 所有API返回统一的响应格式，包含code、message和data字段
+- 📤 **文件上传**: 支持将文件上传到EDA工具工作目录
 
 ## 支持的EDA工具
 
@@ -138,6 +139,7 @@
 - 获取时序信息接口（包括不同topn参数的测试）
 - 执行TCL命令接口
 - 执行cell摆放接口
+- 文件上传接口
 
 ## 日志功能
 
@@ -167,6 +169,7 @@ curl -X GET http://localhost:5000/
 - `/<tool_name>/get_timing` - 获取时序信息
 - `/<tool_name>/execute_tcl` - 执行TCL命令
 - `/<tool_name>/place_cells` - 执行Cell摆放
+- `/<tool_name>/upload_file` - 上传文件到EDA工作目录
 
 ### 1. 读取网表 (`POST /<tool_name>/load_netlist`)
 
@@ -357,6 +360,35 @@ curl -X POST http://localhost:5000/leapr/place_cells \
 
 > 注：data字段通常为空对象，表示cell摆放操作已完成
 
+### 5. 上传文件 (`POST /<tool_name>/upload_file`)
+
+为指定EDA工具上传文件到工作目录（edx_tmp目录）。
+
+#### 请求参数
+- 文件: 通过multipart/form-data格式上传，字段名为 "file"
+
+#### 示例请求 (Leapr)
+```bash
+curl -X POST http://localhost:5000/leapr/upload_file \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@/path/to/your/file.txt"
+```
+
+#### 响应示例 (Leapr)
+```json
+{
+  "status": 200,
+  "message": "File uploaded successfully",
+  "data": {
+    "file_path": "/tmp/edx_server/tmp_1/filename.txt",
+    "file_name": "filename.txt",
+    "file_size": 1024
+  }
+}
+```
+
+> 注：data字段包含上传文件的路径、文件名和文件大小信息
+
 ## 错误处理
 
 API会返回适当的HTTP状态码和错误信息：
@@ -392,6 +424,7 @@ API会返回适当的HTTP状态码和错误信息：
 - 设计数据可视化
 - 远程EDA工具访问
 - EDA工具间的协同工作流
+- 上传设计文件到EDA工具环境
 
 ## 扩展支持
 
