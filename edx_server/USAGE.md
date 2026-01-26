@@ -8,12 +8,12 @@
 ### 权限设置
 首次使用前需要给脚本赋予执行权限：
 ```bash
-chmod +x start_server.sh
+chmod +x start_edx_server.sh
 ```
 
 ### 基本用法
 ```bash
-./start_server.sh
+./start_edx_server.sh
 ```
 
 ### 参数说明
@@ -26,22 +26,22 @@ chmod +x start_server.sh
 
 1. 启动默认服务：
    ```bash
-   ./start_server.sh
+   ./start_edx_server.sh
    ```
 
 2. 指定主机和端口：
    ```bash
-   ./start_server.sh --host 127.0.0.1 --port 8080
+   ./start_edx_server.sh --host 127.0.0.1 --port 8080
    ```
 
 3. 启用调试模式：
    ```bash
-   ./start_server.sh --debug
+   ./start_edx_server.sh --debug
    ```
 
 4. 组合参数：
    ```bash
-   ./start_server.sh --host 0.0.0.0 --port 9000 --debug
+   ./start_edx_server.sh --host 0.0.0.0 --port 9000 --debug
    ```
 
 ## 启动EDA工具并加载Design
@@ -63,11 +63,11 @@ chmod +x start_server.sh
    ```
 3. 创建符号链接到插件的apicommon目录：
    ```bash
-   ln -sf ${EdxPluginPath}/leapr_api/apicommon .
+   ln -sf ${EdxPluginPath}/casese/apicommon .
    ```
 4. 创建符号链接到asap7_scr目录：
    ```bash
-   ln -sf ${EdxPluginPath}/leapr_api/asap7_scr scr
+   ln -sf ${EdxPluginPath}/casese/asap7_scr scr
    ```
 5. 启动EDA工具：
    ```bash

@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+
 # 定义EDA工具抽象基类
 class BaseEDA_Tool:
     def __init__(self, tool_name):
@@ -35,16 +36,19 @@ class BaseEDA_Tool:
 
     def load_netlist(self) -> Design:
         raise NotImplementedError("Subclasses must implement this method")
+
     def download_netlist(self) -> str:
         raise NotImplementedError("Subclasses must implement this method")
+
     def get_timing_info(self, topn=10) -> STA:
         raise NotImplementedError("Subclasses must implement this method")
-    
+
     def execute_tcl_command(self, tcl_commands) -> list[str]:
         raise NotImplementedError("Subclasses must implement this method")
-    
+
     def place_cells(self, cells: list[Cell]) -> list[str]:
         raise NotImplementedError("Subclasses must implement this method")
+
 
 # 不同EDA工具的具体实现
 class Leapr_Tool(BaseEDA_Tool):
@@ -59,7 +63,7 @@ class Leapr_Tool(BaseEDA_Tool):
         """
         # 当前main.py文件的绝对路径
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        netlist_file_path = os.path.join(current_dir,'leapr_api', "apicommon", "get_all_cell_info.tcl")
+        netlist_file_path = os.path.join(current_dir, "apicommon", "get_all_cell_info.tcl")
         tcl_sender = TCLSender()
         result = tcl_sender.send_tcl_file(netlist_file_path)
         my_design = Design()
@@ -94,7 +98,8 @@ class Leapr_Tool(BaseEDA_Tool):
                 pin = pin.strip()
                 if pin:  # 确保不是空字符串
                     my_design.pin_to_cell[pin] = cell_name
-            my_design.cells[cell_name] = Cell(cell_name, loc_x, loc_y, cell_width, cell_height, cell_orient, place_status=cell_place_status)
+            my_design.cells[cell_name] = Cell(cell_name, loc_x, loc_y, cell_width, cell_height, cell_orient,
+                                              place_status=cell_place_status)
         for i in range(row_counter + 1, len(result)):
             # 读取net
             net_info = result[i].strip()
@@ -119,7 +124,7 @@ class Leapr_Tool(BaseEDA_Tool):
         :return: 压缩文件路径
         """
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        netlist_file_path = os.path.join(current_dir, 'leapr_api', "apicommon", "get_all_cell_info.tcl")
+        netlist_file_path = os.path.join(current_dir,"apicommon", "get_all_cell_info.tcl")
         tcl_sender = TCLSender()
         result = tcl_sender.send_tcl_file(netlist_file_path, return_result=False)
         if len(result) != 1:
@@ -137,12 +142,12 @@ class Leapr_Tool(BaseEDA_Tool):
         :param topn:
         """
         tcl_sender = TCLSender()
-        api_dir = DEFAULT_CONFIG.get("api_dir")
+        api_dir = DEFAULT_CONFIG.get("edx_tmp")
         tcl_sender.send_tcl([f'report_timing -group REG2REG -max_paths {topn} -path_type full > {api_dir}/report'])
         report_file = os.path.join(api_dir, "report")
         sta = STA()
         with open(report_file, 'r', encoding='utf-8') as f:
-            #文本格式是注释的样子，文件有很多这种路径，读取文件，解析成STA对象
+            # 文本格式是注释的样子，文件有很多这种路径，读取文件，解析成STA对象
             in_point = False
             counter = 0
             timing_path = None  # 初始化timing_path为None
@@ -168,8 +173,8 @@ class Leapr_Tool(BaseEDA_Tool):
                     timing_path.path_type = line.split(':')[1].strip()
                     continue
                 if 'clock network delay' in line:
-                    if counter %2 == 0:
-                        in_point =  True
+                    if counter % 2 == 0:
+                        in_point = True
                     else:
                         in_point = False
                     counter = counter + 1
@@ -217,6 +222,7 @@ class Leapr_Tool(BaseEDA_Tool):
         tcl_sender = TCLSender()
         tcl_sender.send_tcl(tcl_cmds)
 
+
 # 创建EDA工具实例的字典
 eda_tools = {
     "leapr": Leapr_Tool(),
@@ -230,7 +236,7 @@ def home():
         "message": "EDX Plugin REST API for Multiple EDA Tools",
         "version": "2.3",
         "supported_tools": list(eda_tools.keys()),
-        "config_info": {tool: {"version": "1.0", "features": list(config.keys()) if isinstance(config, dict) else []} 
+        "config_info": {tool: {"version": "1.0", "features": list(config.keys()) if isinstance(config, dict) else []}
                         for tool, config in DEFAULT_CONFIG.items()},
         "endpoints": [
             "/<tool_name>/load_netlist",
@@ -259,7 +265,7 @@ def load_netlist(tool_name):
             return jsonify(EdxResponse(400, error_msg).to_dict()), 400
         design = eda_tools[tool_name].load_netlist()
         logger.info(f"[{tool_name}] 网表加载成功, cell number is {len(design.cells)}")
-        return jsonify(EdxResponse(200, 'success',  design).to_dict()), 200
+        return jsonify(EdxResponse(200, 'success', design).to_dict()), 200
     except Exception as e:
         error_msg = str(e)
         logger.error(f"[{tool_name}] 加载网表时发生未预期异常: {error_msg}")
@@ -277,19 +283,19 @@ def download_netlist(tool_name):
             error_msg = f"Unsupported EDA tool: {tool_name}. Supported tools: {list(eda_tools.keys())}"
             logger.error(error_msg)
             return jsonify(EdxResponse(400, error_msg).to_dict()), 400
-        
+
         # 生成压缩的网表文件
         compressed_file_path = eda_tools[tool_name].download_netlist()
         if len(compressed_file_path) < 1:
             error_msg = f"[{tool_name}] 网表文件生成失败"
             logger.error(error_msg)
             return jsonify(EdxResponse(500, error_msg).to_dict()), 500
-        
+
         # 返回文件供下载
         from flask import send_file
         logger.info(f"[{tool_name}] 网表文件生成成功，准备返回下载: {compressed_file_path}")
         return send_file(compressed_file_path, as_attachment=True, download_name=os.path.basename(compressed_file_path))
-        
+
     except Exception as e:
         error_msg = str(e)
         logger.error(f"[{tool_name}] 生成网表文件时发生未预期异常: {error_msg}")
@@ -309,7 +315,7 @@ def get_timing(tool_name):
             error_msg = f"Unsupported EDA tool: {tool_name}. Supported tools: {list(eda_tools.keys())}"
             logger.error(error_msg)
             return jsonify(EdxResponse(400, "Unsupported EDA tool").to_dict()), 400
-        
+
         # 获取查询参数topn，默认值为10
         topn = request.args.get('topn', default=10, type=int)
         sta = eda_tools[tool_name].get_timing_info(topn)
@@ -335,7 +341,7 @@ def execute_tcl(tool_name):
             error_msg = f"Unsupported EDA tool: {tool_name}. Supported tools: {list(eda_tools.keys())}"
             logger.error(error_msg)
             return jsonify(EdxResponse(400, "Unsupported EDA tool").to_dict()), 400
-        
+
         data = request.get_json()
         command = data.get('commands')
         eda_resp = eda_tools[tool_name].execute_tcl_command(command)
@@ -373,7 +379,7 @@ def place_cells(tool_name):
             error_msg = f"Unsupported EDA tool: {tool_name}. Supported tools: {list(eda_tools.keys())}"
             logger.error(error_msg)
             return jsonify(EdxResponse(400, "Unsupported EDA tool", {}).to_dict()), 400
-        
+
         data = request.get_json()
         # 直接使用请求体数据作为cell列表，根据注释中的格式进行解析
         cell_list = []
@@ -383,9 +389,9 @@ def place_cells(tool_name):
                 cell_data["x"],
                 cell_data["y"],
                 cell_data.get("width", 0.0),  # 使用get方法，如果没有宽度则默认为0
-                cell_data.get("height", 0.0), # 使用get方法，如果没有高度则默认为0
-                cell_data.get("orient", ""), # 使用get方法，如果没有方向则默认为空字符串
-                place_status=cell_data.get("place_status", "") # 使用get方法，如果没有放置状态则默认为空字符串
+                cell_data.get("height", 0.0),  # 使用get方法，如果没有高度则默认为0
+                cell_data.get("orient", ""),  # 使用get方法，如果没有方向则默认为空字符串
+                place_status=cell_data.get("place_status", "")  # 使用get方法，如果没有放置状态则默认为空字符串
             )
             cell_list.append(cell)
         eda_tools[tool_name].place_cells(cell_list)

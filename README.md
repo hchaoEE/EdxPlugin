@@ -37,8 +37,8 @@
 
 或者使用启动脚本：
    ```bash
-   chmod +x start_server.sh
-   ./start_server.sh
+   chmod +x start_edx_server.sh
+   ./start_edx_server.sh
    ```
 
 服务器将在 http://localhost:5000 上运行。
@@ -63,11 +63,11 @@
    ```
 3. 创建符号链接到插件的apicommon目录：
    ```bash
-   ln -sf ${EdxPluginPath}/leapr_api/apicommon .
+   ln -sf ${EdxPluginPath}/casese/apicommon .
    ```
 4. 创建符号链接到asap7_scr目录：
    ```bash
-   ln -sf ${EdxPluginPath}/leapr_api/asap7_scr scr
+   ln -sf ${EdxPluginPath}/casese/asap7_scr scr
    ```
 5. 启动EDA工具：
    ```bash
@@ -82,24 +82,24 @@
 
 1. 使脚本可执行：
    ```bash
-   chmod +x start_server.sh
+   chmod +x start_edx_server.sh
    ```
 
 2. 运行脚本：
    ```bash
-   ./start_server.sh
+   ./start_edx_server.sh
    ```
 
 3. 自定义参数：
    ```bash
    # 指定主机和端口
-   ./start_server.sh --host 0.0.0.0 --port 8080
+   ./start_edx_server.sh --host 0.0.0.0 --port 8080
    
    # 启用调试模式
-   ./start_server.sh --debug
+   ./start_edx_server.sh --debug
    
    # 同时指定多个参数
-   ./start_server.sh --host 127.0.0.1 --port 8080 --debug
+   ./start_edx_server.sh --host 127.0.0.1 --port 8080 --debug
    ```
 
 脚本功能：

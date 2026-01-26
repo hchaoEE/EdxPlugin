@@ -13,17 +13,17 @@ proc log_debug {{args ""}} {
     }
 }
 
-# 判断如果没有api_dir变量,则报错，脚本执行结束
-if {![info exists api_dir]} {
-    log_info "错误: api_dir 变量未定义"
+# 判断如果没有EDX_TMP变量,则报错，脚本执行结束
+if {![info exists EDX_TMP]} {
+    log_info "错误: EDX_TMP 变量未定义"
     exit 1
 }
 
-log_info "api dir is ${api_dir}"
+log_info "api dir is ${EDX_TMP}"
 # 写一个死循环，不断读取目录下是否有client_result文件
 proc monitor_client_result {} {
-    global api_dir
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    set target_dir "${EDX_TMP}"
     while {1} {
         set client_result_path [file join $target_dir "client_result_done"]
         # 检查 client_result 文件是否存在
@@ -56,7 +56,7 @@ proc monitor_client_result {} {
                 puts $f "done"
                 close $f
             }
-            # 如果api_dir目录下有plugin_msg_done文件，则读取plugin_msg.txt文件,并将内容打印出来
+            # 如果EDX_TMP目录下有plugin_msg_done文件，则读取plugin_msg.txt文件,并将内容打印出来
             set plugin_msg_path [file join $target_dir "plugin_msg.txt"]
             set plugin_msg_done_path [file join $target_dir "plugin_msg_done"]
             if {[file exists $plugin_msg_path]} {
@@ -76,8 +76,8 @@ proc monitor_client_result {} {
 }
 
 proc monitor_client_result_plugin {} {
-    global api_dir
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    set target_dir "${EDX_TMP}"
     while {1} {
         set client_result_path [file join $target_dir "client_result_done"]
         # 检查 client_result 文件是否存在
@@ -117,7 +117,7 @@ proc monitor_client_result_plugin {} {
         after 1000  ;# 休眠1秒
         # 检测插件是否执行完
         log_debug "==========waiting plugin_msg_done"
-        # 如果api_dir目录下有plugin_msg_done文件，则读取plugin_msg.txt文件,并将内容打印出来
+        # 如果EDX_TMP目录下有plugin_msg_done文件，则读取plugin_msg.txt文件,并将内容打印出来
         set plugin_msg_path [file join $target_dir "plugin_msg.txt"]
         set plugin_msg_done_path [file join $target_dir "plugin_msg_done"]
         if {[file exists $plugin_msg_path]} {
@@ -136,8 +136,8 @@ proc monitor_client_result_plugin {} {
 }
 
 proc pyc_reset {} {
-    global api_dir
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    set target_dir "${EDX_TMP}"
     # target_dir目录下plugin_cmd.txt文件中写入：pyc_reset，如果文件不存在则创建这个文件
     set plugin_cmd_path [file join $target_dir "plugin_cmd.txt"]
     if {[file exists $plugin_cmd_path]} {
@@ -159,8 +159,8 @@ proc pyc_reset {} {
 }
 
 proc pyc_global_placement {{args ""}} {
-    global api_dir
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    set target_dir "${EDX_TMP}"
     # target_dir目录下plugin_cmd.txt文件中写入：pyc_global_placement，如果文件不存在则创建这个文件
     set plugin_cmd_path [file join $target_dir "plugin_cmd.txt"]
     if {[file exists $plugin_cmd_path]} {
@@ -186,8 +186,8 @@ proc pyc_global_placement {{args ""}} {
 }
 
 proc pyc_increment_placement {{args ""}} {
-    global api_dir
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    set target_dir "${EDX_TMP}"
     # target_dir目录下plugin_cmd.txt文件中写入：pyc_increment_placement，如果文件不存在则创建这个文件
     set plugin_cmd_path [file join $target_dir "plugin_cmd.txt"]
     if {[file exists $plugin_cmd_path]} {
@@ -213,8 +213,8 @@ proc pyc_increment_placement {{args ""}} {
 }
 
 proc pyc_reset_only_increment {} {
-    global api_dir
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    set target_dir "${EDX_TMP}"
     # target_dir目录下plugin_cmd.txt文件中写入：pyc_reset_only_increment，如果文件不存在则创建这个文件
     set plugin_cmd_path [file join $target_dir "plugin_cmd.txt"]
     if {[file exists $plugin_cmd_path]} {
@@ -236,8 +236,8 @@ proc pyc_reset_only_increment {} {
 }
 
 proc pyc_get_cell {{args ""}} {
-    global api_dir
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    set target_dir "${EDX_TMP}"
     # target_dir目录下plugin_cmd.txt文件中写入：pyc_get_cell，如果文件不存在则创建这个文件
     set plugin_cmd_path [file join $target_dir "plugin_cmd.txt"]
     if {[file exists $plugin_cmd_path]} {
@@ -263,8 +263,8 @@ proc pyc_get_cell {{args ""}} {
 }
 
 proc pyc_get_name {{args ""}} {
-    global api_dir
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    set target_dir "${EDX_TMP}"
     # target_dir目录下plugin_cmd.txt文件中写入：pyc_get_name，如果文件不存在则创建这个文件
     set plugin_cmd_path [file join $target_dir "plugin_cmd.txt"]
     if {[file exists $plugin_cmd_path]} {
@@ -290,9 +290,9 @@ proc pyc_get_name {{args ""}} {
 }
 
 proc pyc_refresh_timing {{args ""}} {
-    global api_dir
-    report_timing -group REG2REG -max_paths $args -path_type full > $api_dir/report
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    report_timing -group REG2REG -max_paths $args -path_type full > $EDX_TMP/report
+    set target_dir "${EDX_TMP}"
     # target_dir目录下plugin_cmd.txt文件中写入：pyc_refresh_timing，如果文件不存在则创建这个文件
     set plugin_cmd_path [file join $target_dir "plugin_cmd.txt"]
     if {[file exists $plugin_cmd_path]} {
@@ -314,8 +314,8 @@ proc pyc_refresh_timing {{args ""}} {
 }
 
 proc pyc_report_timing {{args ""}} {
-    global api_dir
-    set target_dir "${api_dir}"
+    global EDX_TMP
+    set target_dir "${EDX_TMP}"
     # target_dir目录下plugin_cmd.txt文件中写入：pyc_report_timing，如果文件不存在则创建这个文件
     set plugin_cmd_path [file join $target_dir "plugin_cmd.txt"]
     if {[file exists $plugin_cmd_path]} {

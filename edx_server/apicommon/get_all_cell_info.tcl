@@ -54,7 +54,7 @@ set core_size [udm_get_prop [udm_get_obj -type floorplan] core_box_size]
 
 # 初始化变量
 set net_map {}
-set server_result_txt [file join $api_dir "server_result.txt"]
+set server_result_txt [file join $EDX_TMP "server_result.txt"]
 set fp [open "${server_result_txt}" w]
 
 puts $fp "=======design_info======="
