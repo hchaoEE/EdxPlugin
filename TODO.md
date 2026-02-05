@@ -1,7 +1,7 @@
 ## TODO
 
 > 目的：切割APR Design为多个SubAPR，并构造EDA Agent Sever与多个SubAPR + Flatten交互，做信息交互&布局控制
-> 说明：勾选框用于跟踪进度；优先级从 P0（必须）到 P2（增强）。
+> 说明：勾选框用于跟踪进度。
 
 ---
 
@@ -33,6 +33,7 @@
   - [x] **设计/约束切分**：网表 & 约束切分，按module
   - [ ] **设计/约束切分**：网表 & 约束切分，按Cycle
   - [ ] **subAPR重建**: 切分后的设计重建APR，不重新布局
+
       FlattenAPR布局
       ![全局布局](/data/image/flatten.png)  
       SubAPR重建
