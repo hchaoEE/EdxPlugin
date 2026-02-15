@@ -1,0 +1,58 @@
+{
+  "jobs": [
+    {
+      "project": "P1",
+      "design": "top_variant_001",
+      "owner": "cad_user",
+      "priority": 1,
+      "timeout_sec": 7200,
+      "retry_limit": 1,
+      "workdir": "/tmp",
+      "command": "bash -lc \"echo job001 && sleep 3\"",
+      "resource_request": {
+        "cpu": 2,
+        "memory_gb": 4,
+        "slots": 1,
+        "host_labels": {
+          "tool": "innovus"
+        }
+      }
+    },
+    {
+      "project": "P1",
+      "design": "top_variant_002",
+      "owner": "cad_user",
+      "priority": 1,
+      "timeout_sec": 7200,
+      "retry_limit": 1,
+      "workdir": "/tmp",
+      "command": "bash -lc \"echo job002 && sleep 3\"",
+      "resource_request": {
+        "cpu": 2,
+        "memory_gb": 4,
+        "slots": 1,
+        "host_labels": {
+          "tool": "innovus"
+        }
+      }
+    },
+    {
+      "project": "P1",
+      "design": "top_variant_003",
+      "owner": "cad_user",
+      "priority": 1,
+      "timeout_sec": 7200,
+      "retry_limit": 1,
+      "workdir": "/tmp",
+      "command": "bash -lc \"echo job003 && sleep 3\"",
+      "resource_request": {
+        "cpu": 2,
+        "memory_gb": 4,
+        "slots": 1,
+        "host_labels": {
+          "tool": "innovus"
+        }
+      }
+    }
+  ]
+}

@@ -13,6 +13,18 @@
 - 📊 **统一响应格式**: 所有API返回统一的响应格式，包含code、message和data字段
 - 📤 **文件上传**: 支持将文件上传到EDA工具工作目录
 
+## 新增：APR并行调度器（MVP）
+
+项目已新增 `/scheduler/*` 接口用于APR批量调度与监控，支持：
+
+- 多主机注册与心跳
+- 单任务/批量任务提交
+- 优先级+资源约束调度
+- 任务日志查询与状态跟踪
+- 任务控制（pause/resume/stop/rerun）
+
+详细使用方式见：`edx_server/APR_SCHEDULER_USAGE.md`
+
 ## 支持的EDA工具
 
 - **Leapr**: 物理设计工具，用于布局布线
