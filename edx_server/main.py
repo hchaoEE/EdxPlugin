@@ -5,6 +5,7 @@ import logging
 from plugin_data import *
 from tcl_sender import *
 import json
+from apr_scheduler import scheduler_blueprint
 
 # 创建tmp目录
 tmp_dir = os.path.join(os.path.dirname(__file__), 'tmp')
@@ -23,6 +24,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+app.register_blueprint(scheduler_blueprint, url_prefix="/scheduler")
 
 
 # 定义EDA工具抽象基类
